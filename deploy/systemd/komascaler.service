@@ -1,0 +1,37 @@
+[Unit]
+Description=KomaScaler.Net Suwayomi upscaler
+After=network.target nvidia-persistenced.service
+Wants=nvidia-persistenced.service
+
+[Service]
+Type=exec
+User=komascaler
+Group=komascaler
+WorkingDirectory=/etc/komascaler
+ExecStart=/usr/lib/komascaler/komascaler --contentRoot /etc/komascaler
+ExecStartPost=/usr/bin/curl --fail --silent --show-error --max-time 840 --retry 840 --retry-delay 1 --retry-connrefused http://127.0.0.1:9999/health/ready
+Environment=DOTNET_ENVIRONMENT=Production
+Environment=NVIDIA_TF32_OVERRIDE=0
+EnvironmentFile=-/etc/komascaler/komascaler.env
+LoadCredential=Upscaling__Security__Token:/etc/komascaler/token
+Restart=on-failure
+RestartSec=5s
+TimeoutStartSec=15min
+TimeoutStopSec=45s
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=false
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictRealtime=true
+SystemCallArchitectures=native
+ReadOnlyPaths=/etc/komascaler /var/lib/komascaler/models
+ReadWritePaths=/var/cache/komascaler /var/lib/komascaler
+
+[Install]
+WantedBy=multi-user.target

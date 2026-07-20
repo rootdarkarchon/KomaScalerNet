@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <AssemblyName>komascaler</AssemblyName>
+    <RootNamespace>KomaScaler</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.ML.OnnxRuntime.Gpu" />
+    <ProjectReference Include="../KomaScaler.Core/KomaScaler.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="../../models/models.production.json" Link="models/models.production.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

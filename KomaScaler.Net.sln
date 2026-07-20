@@ -1,0 +1,42 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KomaScaler.Api", "src\KomaScaler.Api\KomaScaler.Api.csproj", "{B7D255E3-D406-4B58-8527-D81552D0ECF6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KomaScaler.Core", "src\KomaScaler.Core\KomaScaler.Core.csproj", "{9FF64472-3FD0-40E6-8066-890D298A9F83}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KomaScaler.UnitTests", "tests\KomaScaler.UnitTests\KomaScaler.UnitTests.csproj", "{4917F0FA-665A-4685-BB5B-29E1B26DE1D8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KomaScaler.IntegrationTests", "tests\KomaScaler.IntegrationTests\KomaScaler.IntegrationTests.csproj", "{909BD0AD-F62F-4E64-AD86-2CAECB91540F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KomaScaler.GpuTests", "tests\KomaScaler.GpuTests\KomaScaler.GpuTests.csproj", "{261FF0EF-4C18-4E89-9256-5EDB1068624C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B7D255E3-D406-4B58-8527-D81552D0ECF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7D255E3-D406-4B58-8527-D81552D0ECF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7D255E3-D406-4B58-8527-D81552D0ECF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7D255E3-D406-4B58-8527-D81552D0ECF6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9FF64472-3FD0-40E6-8066-890D298A9F83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FF64472-3FD0-40E6-8066-890D298A9F83}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FF64472-3FD0-40E6-8066-890D298A9F83}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FF64472-3FD0-40E6-8066-890D298A9F83}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4917F0FA-665A-4685-BB5B-29E1B26DE1D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4917F0FA-665A-4685-BB5B-29E1B26DE1D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4917F0FA-665A-4685-BB5B-29E1B26DE1D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4917F0FA-665A-4685-BB5B-29E1B26DE1D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{909BD0AD-F62F-4E64-AD86-2CAECB91540F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{909BD0AD-F62F-4E64-AD86-2CAECB91540F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{909BD0AD-F62F-4E64-AD86-2CAECB91540F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{909BD0AD-F62F-4E64-AD86-2CAECB91540F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{261FF0EF-4C18-4E89-9256-5EDB1068624C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{261FF0EF-4C18-4E89-9256-5EDB1068624C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{261FF0EF-4C18-4E89-9256-5EDB1068624C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{261FF0EF-4C18-4E89-9256-5EDB1068624C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

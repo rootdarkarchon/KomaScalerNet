@@ -1,0 +1,40 @@
+root = true
+
+[src/KomaScaler.Core/Configuration/UpscalingOptions.cs]
+# These immutable option records form one configuration contract.
+dotnet_diagnostic.MA0048.severity = none
+
+[{src/KomaScaler.Core/Cache/FileCache.cs,src/KomaScaler.Core/Concurrency/InFlightRegistry.cs,src/KomaScaler.Core/Configuration/Policy.cs,src/KomaScaler.Core/Images/ImageProcessor.cs,src/KomaScaler.Core/Models/InventoryState.cs,src/KomaScaler.Core/Models/ModelInventory.cs,src/KomaScaler.Core/Pipeline/PipelineKey.cs,src/KomaScaler.Core/Tiling/Tiler.cs}]
+# Each listed file owns a tightly coupled contract/implementation family; the
+# exceptions are file-scoped and do not disable MA0048 for new code.
+dotnet_diagnostic.MA0048.severity = none
+
+[src/KomaScaler.Api/Inference/GpuUpscaler.cs]
+# Keep lifecycle/fault cleanup ordering visible in the owning type.
+dotnet_diagnostic.MA0048.severity = none
+dotnet_diagnostic.MA0051.severity = none
+
+[src/KomaScaler.Api/Inference/ConversionQueue.cs]
+# Queue contracts and their sole implementation share one ownership boundary.
+dotnet_diagnostic.MA0048.severity = none
+
+[src/KomaScaler.Api/Program.cs]
+# Endpoint orchestration is deliberately kept next to route registration.
+dotnet_diagnostic.MA0051.severity = none
+
+[tests/KomaScaler.GpuTests/GpuAcceptanceTests.cs]
+# Opt-in host acceptance scenarios and their private fixtures are one harness.
+dotnet_diagnostic.MA0048.severity = none
+dotnet_diagnostic.MA0051.severity = none
+
+[{tests/KomaScaler.UnitTests/ImageProcessorTests.cs,tests/KomaScaler.UnitTests/ModelInventoryTests.cs,tests/KomaScaler.UnitTests/OutputEncodingBenchmarkTests.cs}]
+# Test-only attributes/fixtures stay beside the scenarios that consume them.
+dotnet_diagnostic.MA0048.severity = none
+
+[tests/KomaScaler.UnitTests/OutputEncodingBenchmarkTests.cs]
+# This opt-in benchmark keeps one timed matrix in one method for comparability.
+dotnet_diagnostic.MA0051.severity = none
+
+[tests/KomaScaler.IntegrationTests/ConvertEndpointTests.cs]
+# Private host and backend fakes belong to this endpoint harness only.
+dotnet_diagnostic.MA0048.severity = none

@@ -1,0 +1,13 @@
+server.serveConversions = {
+  default = {
+    target = "http://127.0.0.1:9999/convert"
+    callTimeout = 2m
+    connectTimeout = 5s
+    headers = {
+      "X-Upscaler-Token" = "replace-with-the-same-long-random-value"
+    }
+  }
+}
+
+# Config/object syntax is required even when no download conversions are used.
+server.downloadConversions = {}

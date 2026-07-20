@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "selectionPolicyVersion": "mangajanai-v1-height-midpoint-oriented-v1",
+  "graphContract": {
+    "opset": 17,
+    "batch": 1,
+    "inputName": "input",
+    "inputType": "float32",
+    "inputLayout": "NCHW",
+    "inputRange": [0.0, 1.0],
+    "outputName": "output",
+    "outputType": "float32",
+    "outputLayout": "NCHW",
+    "scale": 2,
+    "minimumHeight": 4,
+    "minimumWidth": 4,
+    "dynamicSpatialDimensions": true,
+    "padding": "reflect right/bottom to multiple of 4 inside graph; replicate only when reflection is impossible; crop to exact 2x output"
+  },
+  "runtime": {
+    "onnxRuntimeVersion": "1.26.0",
+    "cudaMajor": 12,
+    "cudnnMajor": 9,
+    "precision": "fp32",
+    "tf32": false,
+    "requiredExecutionProvider": "TensorrtExecutionProvider"
+  },
+  "license": {
+    "spdxLikeIdentifier": "CC-BY-NC-4.0",
+    "source": "https://github.com/the-database/MangaJaNai",
+    "notice": "ONNX files are conversions of the official MangaJaNai weights and are not included in this handoff. Preserve attribution and non-commercial restrictions."
+  },
+  "models": [
+    {
+      "id": "mangajanai-v1-1200p-2x-fp32",
+      "nominalHeight": 1200,
+      "minimumHeight": 1,
+      "maximumHeight": 1250,
+      "file": "2x_MangaJaNai_1200p_V1_ESRGAN_70k.fp32.onnx",
+      "sha256": "001d55ee9bf9fe43cdcce817cc2d13fed30f9f95dcba502cf7f69384d1596474",
+      "sourceFile": "2x_MangaJaNai_1200p_V1_ESRGAN_70k.pth",
+      "sourceSha256": "43b784f674bdbf89886a62a64cd5f8d8df92caf4d861bdf4d47dad249ede0267"
+    },
+    {
+      "id": "mangajanai-v1-1300p-2x-fp32",
+      "nominalHeight": 1300,
+      "minimumHeight": 1251,
+      "maximumHeight": 1350,
+      "file": "2x_MangaJaNai_1300p_V1_ESRGAN_75k.fp32.onnx",
+      "sha256": "ac04401fb18715135166ca3a28cfb6e8e46d1bd6c3f0db95583a5a74baa6f8f1",
+      "sourceFile": "2x_MangaJaNai_1300p_V1_ESRGAN_75k.pth",
+      "sourceSha256": "15ca3c0f75f97f7bf52065bf7c9b8d602de94ce9e3b078ac58793855eed18589"
+    },
+    {
+      "id": "mangajanai-v1-1400p-2x-fp32",
+      "nominalHeight": 1400,
+      "minimumHeight": 1351,
+      "maximumHeight": 1450,
+      "file": "2x_MangaJaNai_1400p_V1_ESRGAN_70k.fp32.onnx",
+      "sha256": "3d813490698f6208a1c0273b1c1170fad560eb3c3aaca9097578542c39521ec0",
+      "sourceFile": "2x_MangaJaNai_1400p_V1_ESRGAN_70k.pth",
+      "sourceSha256": "a940ad8ebcf6bea5580f2f59df67deb009f054c9b87dbbc58c2e452722f34858"
+    },
+    {
+      "id": "mangajanai-v1-1500p-2x-fp32",
+      "nominalHeight": 1500,
+      "minimumHeight": 1451,
+      "maximumHeight": 1550,
+      "file": "2x_MangaJaNai_1500p_V1_ESRGAN_90k.fp32.onnx",
+      "sha256": "c16a4416e0c509c0239a0c50f6b378142d1e2bdb6ab7622921449ff0e886a38d",
+      "sourceFile": "2x_MangaJaNai_1500p_V1_ESRGAN_90k.pth",
+      "sourceSha256": "d91f2d247fa61144c1634a2ba46926acd3956ae90d281a5bed6655f8364a5b2c"
+    },
+    {
+      "id": "mangajanai-v1-1600p-2x-fp32",
+      "nominalHeight": 1600,
+      "minimumHeight": 1551,
+      "maximumHeight": 1760,
+      "file": "2x_MangaJaNai_1600p_V1_ESRGAN_90k.fp32.onnx",
+      "sha256": "fca9f830f481ec43faff5076e3e9d678ad1c28ef037abdc74bc8e10c09919dd5",
+      "sourceFile": "2x_MangaJaNai_1600p_V1_ESRGAN_90k.pth",
+      "sourceSha256": "6f5923f812dbc5d6aeed727635a21e74cacddce595afe6135cbd95078f6eee44"
+    },
+    {
+      "id": "mangajanai-v1-1920p-2x-fp32",
+      "nominalHeight": 1920,
+      "minimumHeight": 1761,
+      "maximumHeight": 1984,
+      "file": "2x_MangaJaNai_1920p_V1_ESRGAN_70k.fp32.onnx",
+      "sha256": "5c73f796e98e6af3ca6a3ecbc583a2f47ec0252f291d51024164d6197f55da7b",
+      "sourceFile": "2x_MangaJaNai_1920p_V1_ESRGAN_70k.pth",
+      "sourceSha256": "1ad4aa6f64684baa430da1bb472489bff2a02473b14859015884a3852339c005"
+    },
+    {
+      "id": "mangajanai-v1-2048p-2x-fp32",
+      "nominalHeight": 2048,
+      "minimumHeight": 1985,
+      "maximumHeight": null,
+      "file": "2x_MangaJaNai_2048p_V1_ESRGAN_95k.fp32.onnx",
+      "sha256": "78e095c7c2af0c074e6ba56b6b7f0084cecd73153dca7d6908ba138c65999569",
+      "sourceFile": "2x_MangaJaNai_2048p_V1_ESRGAN_95k.pth",
+      "sourceSha256": "146cd009b9589203a8444fe0aa7195709bb5b9fdeaca3808b7fbbd5538f94c41"
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+# .NET build, test, coverage, and publish output
+**/bin/
+**/obj/
+TestResults/
+**/TestResults/
+coverage/
+coverage.*
+artifacts/
+publish/
+
+# IDE and user state
+.vs/
+.idea/
+.vscode/
+.codex/
+*.user
+*.suo
+*.rsuser
+
+# Logs and runtime response/cache state
+logs/
+*.log
+cache/
+state/
+responses/
+*.response
+*.tmp
+
+# Models, native packages, TensorRT engines/timing caches, and ORT profiles
+*.pth
+*.onnx
+*.engine
+*.plan
+*.timing
+*.timing_cache
+onnxruntime_profile*.json
+*ort-profile*.json
+runtimes/
+
+# Benchmark output and generated/local images
+benchmark-results/
+benchmarks/results/
+local-fixtures/
+local-images/
+generated-images/
+*.generated.png
+*.generated.webp
+
+# Local configuration, credentials, and tokens
+appsettings.Local.json
+appsettings.*.local.json
+appsettings.Production.json
+.env
+.env.*
+*.secret
+*.secrets
+*.token
+token
+credentials/
+
+# Python development state (model export tooling only)
+**/__pycache__/
+*.pyc
+tools/model-export/.venv/
+tools/model-export/models/
+tools/model-export/work/
+
+# Acceptance data belongs on the disk-backed host workspace, never in Git.
+devtmp/
+komascaler-acceptance/
