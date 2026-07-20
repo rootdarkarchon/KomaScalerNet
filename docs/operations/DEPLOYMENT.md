@@ -2,19 +2,274 @@
 
 This is the current operator guide. Documents under `docs/history/` and `docs/benchmarks/` are dated evidence, not configuration instructions.
 
-## Required host
+## 1. Build machine
 
-The validated target is Debian 13 with an RTX 3060 12 GiB, .NET/ASP.NET Core 10, an NVIDIA driver supporting CUDA 12.9, CUDA 12.9 runtime, cuDNN 9, TensorRT 10.14, ONNX Runtime 1.26, and libvips. TensorRT is the only production execution provider. Its CUDA runtime/driver dependencies are still mandatory.
-
-Run preflight before installation:
+Building KomaScaler.Net requires the **.NET 10 SDK**. The tested host uses
+Debian 13 and SDK 10.0.302; these are tested versions, not universal minimums.
+Microsoft's [Debian installation guide](https://learn.microsoft.com/dotnet/core/install/linux-debian)
+documents its Debian 13 package feed. On a fresh host, add that feed before
+installing .NET:
 
 ```bash
-KOMASCALER_GPU_MODEL_DIR=/var/lib/komascaler/models \
-KOMASCALER_ACCEPTANCE_ROOT=/var/lib/komascaler/acceptance \
-sh scripts/engines/tensorrt-preflight.sh
+sudo apt-get update
+sudo apt-get install --yes ca-certificates curl
+
+dotnet_repo_tmp=$(mktemp -d)
+cleanup_dotnet_repo_tmp() {
+  rm -rf -- "$dotnet_repo_tmp"
+}
+trap cleanup_dotnet_repo_tmp EXIT HUP INT TERM
+
+curl --fail --location \
+  --output "$dotnet_repo_tmp/packages-microsoft-prod.deb" \
+  https://packages.microsoft.com/config/debian/13/packages-microsoft-prod.deb
+sudo dpkg -i "$dotnet_repo_tmp/packages-microsoft-prod.deb"
+sudo apt-get update
 ```
 
-The script reports provider/library load failures, versions, disk, RAM, VRAM, and cache writability. It does not install packages.
+The trap removes only the directory returned by `mktemp -d`. Install the build
+dependencies:
+
+```bash
+sudo apt-get update
+sudo apt-get install --yes \
+  dotnet-sdk-10.0 \
+  git \
+  ca-certificates \
+  curl
+```
+
+`wget` may replace `curl` for downloads, but the installed production unit uses
+`curl` for its readiness probe. `jq` is additionally required by the production
+engine-preparation script:
+
+```bash
+sudo apt-get install --yes jq
+```
+
+The solution consumes NetVips through NuGet and loads the libvips shared
+library dynamically. It does not compile or link native libvips code, so
+`libvips-dev` is **not** a build requirement. No repository build step invokes a
+C/C++ compiler, therefore `build-essential` is also unnecessary. The current
+scripts do not use `unzip`.
+
+Run the repository's local verification entry point rather than maintaining a
+second command list here:
+
+```bash
+sh scripts/verify.sh
+```
+
+The target-host engine preparation and GPU acceptance scripts also call
+`dotnet publish`, `build`, and `test`. Consequently the SDK and `jq` are needed
+on the target while those scripts run. They are build/validation tools, not
+dependencies of the installed service.
+
+## 2. Production runtime
+
+The supplied publish command creates a framework-dependent deployment. A host
+that only runs already-published output therefore needs:
+
+```bash
+sudo apt-get install --yes \
+  aspnetcore-runtime-10.0 \
+  libvips-tools \
+  ca-certificates \
+  curl \
+  openssl
+```
+
+On Debian 13, `libvips-tools` pulls in `libvips42t64`, the actual shared-library
+runtime used by NetVips. Installing `libvips42t64` directly is also valid, but
+the tools package provides `vips --version` for preflight and verification.
+Neither `libvips-dev` nor .NET SDK files are needed merely to run the installed
+service. See Debian's [libvips42t64 package](https://packages.debian.org/stable/libs/libvips42t64)
+and the [libvips installation documentation](https://www.libvips.org/install.html).
+
+`curl` is used by `ExecStartPost` for readiness. `openssl` is used by the
+installer to generate an authenticated deployment token; it is not used by the
+steady-state application. ONNX Runtime 1.26 is supplied by the pinned
+`Microsoft.ML.OnnxRuntime.Gpu` NuGet package in the publish output, not by a
+Debian system package.
+
+## 3. NVIDIA driver and GPU verification
+
+The kernel NVIDIA driver is separate from CUDA, cuDNN, and TensorRT userspace
+libraries. Install a driver appropriate for the GPU and Debian host using the
+operator's normal driver-management policy; do not let a CUDA meta-package
+silently replace a known-working driver.
+
+The tested system is an RTX 3060 12 GiB with driver **595.58.03**. Verify the
+driver before adding userspace libraries:
+
+```bash
+nvidia-smi
+nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv,noheader
+```
+
+If these commands fail, repair the driver first. Installing CUDA libraries
+cannot fix a nonfunctional kernel driver. Refer to NVIDIA's
+[CUDA Linux installation guide](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html)
+for NVIDIA's driver/toolkit relationship and pre-installation checks.
+
+## 4. CUDA 12.9, cuDNN 9, and TensorRT 10 runtime
+
+The known-good target used CUDA **12.9.2**, cuDNN **9.24.0.43**, TensorRT
+**10.14.1.48**, ONNX Runtime **1.26**, and driver **595.58.03**. These are the
+tested versions, not general minimum-version claims. TensorRT is the mandatory
+production execution provider, but it still depends on the NVIDIA driver,
+CUDA, and cuDNN.
+
+Do **not** install the unversioned `cuda` or `cuda-toolkit` meta-packages. They
+track the repository's current release and may install CUDA 13 or alter the
+working driver stack. KomaScaler needs the versioned runtime package
+`cuda-libraries-12-9`; it does not need the full CUDA toolkit, compiler,
+samples, or development headers.
+
+### Debian 13 / CUDA 12.9 compatibility repository
+
+> At the time of this tested deployment, NVIDIA's Debian 13 repository
+> publishes CUDA 13 packages and does not provide the required CUDA 12.9
+> versioned packages. CUDA 12.9, its matching TensorRT build, and the CUDA-12
+> cuDNN package therefore come from NVIDIA's **Debian 12 CUDA repository**.
+> This is a deliberately narrow, version-pinned compatibility workaround.
+> Never add ordinary Debian 12 distribution repositories to Debian 13.
+
+NVIDIA's Debian 12 repository and keyring package are visible in its
+[official repository index](https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/).
+If the Debian 13 `cuda-keyring` package is already installed, do not install the
+Debian 12 package over it: both use the same package/file identity. Extract the
+second key under a distinct name instead:
+
+```bash
+compat_tmp=$(mktemp -d)
+cleanup_compat_tmp() {
+  rm -rf -- "$compat_tmp"
+}
+trap cleanup_compat_tmp EXIT HUP INT TERM
+
+curl --fail --location \
+  --output "$compat_tmp/cuda-keyring_1.1-1_all.deb" \
+  https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/cuda-keyring_1.1-1_all.deb
+
+dpkg-deb -x \
+  "$compat_tmp/cuda-keyring_1.1-1_all.deb" \
+  "$compat_tmp/extracted"
+
+sudo install -o root -g root -m 0644 \
+  "$compat_tmp/extracted/usr/share/keyrings/cuda-archive-keyring.gpg" \
+  /usr/share/keyrings/cuda-debian12-archive-keyring.gpg
+
+printf '%s\n' \
+  'deb [signed-by=/usr/share/keyrings/cuda-debian12-archive-keyring.gpg] https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/ /' \
+  | sudo tee /etc/apt/sources.list.d/cuda-debian12-x86_64.list >/dev/null
+
+sudo apt-get update
+```
+
+The trap removes only the resolved directory returned by `mktemp -d`. Keep a
+Debian 13 NVIDIA source, if present, bound to its own Debian 13 keyring. Separate
+keyring filenames prevent one `cuda-keyring` package from overwriting the
+other repository's key and avoid the missing-key/signature failure observed on
+the tested host.
+
+Before installing anything, inspect the candidates and available TensorRT
+versions:
+
+```bash
+apt-cache policy \
+  cuda-libraries-12-9 \
+  cudnn9-cuda-12 \
+  libnvinfer10 \
+  libnvinfer-plugin10 \
+  libnvonnxparsers10
+
+apt-cache madison \
+  libnvinfer10 \
+  libnvinfer-plugin10 \
+  libnvonnxparsers10
+```
+
+Simulate the exact tested runtime transaction first:
+
+```bash
+sudo apt-get --simulate install \
+  cuda-libraries-12-9=12.9.2-1 \
+  cudnn9-cuda-12=9.24.0.43-1 \
+  libnvinfer10=10.14.1.48-1+cuda12.9 \
+  libnvinfer-plugin10=10.14.1.48-1+cuda12.9 \
+  libnvonnxparsers10=10.14.1.48-1+cuda12.9
+```
+
+Stop if APT proposes CUDA 13, a different TensorRT ABI, or removal/replacement
+of the working NVIDIA driver. When the simulation is correct, run the same
+version-pinned transaction without `--simulate`:
+
+```bash
+sudo apt-get install \
+  cuda-libraries-12-9=12.9.2-1 \
+  cudnn9-cuda-12=9.24.0.43-1 \
+  libnvinfer10=10.14.1.48-1+cuda12.9 \
+  libnvinfer-plugin10=10.14.1.48-1+cuda12.9 \
+  libnvonnxparsers10=10.14.1.48-1+cuda12.9
+```
+
+APT metadata on the tested host shows that `libnvinfer-plugin10` and
+`libnvonnxparsers10` depend on the exact matching `libnvinfer10`; those three
+packages provide the TensorRT libraries KomaScaler loads. No TensorRT
+development, samples, Python, lean/dispatch, or `trtexec` package is required.
+CUDA and cuDNN are intentionally listed separately rather than assumed to come
+from TensorRT. See NVIDIA's [cuDNN Linux guide](https://docs.nvidia.com/deeplearning/cudnn/installation/latest/linux.html)
+and [TensorRT Debian package guide](https://docs.nvidia.com/deeplearning/tensorrt/latest/installing-tensorrt/install-debian.html).
+
+## 5. Optional model export tooling
+
+Model export is a one-time preparation task and is not a production-service
+dependency. The pinned Python stack is supported with Python **3.10-3.12**;
+Debian 13's default Python 3.13 must not be presented as compatible with that
+environment. On the tested Debian 13 APT sources, `python3.12` has no candidate.
+
+Use the repository's supported Python 3.10-3.12 environment/bootstrap method
+and point `PYTHON_BIN` at that environment. Do not add an ordinary Debian 12
+repository merely to obtain Python. The detailed procedure and pinned packages
+are in [the export plan](../history/EXPORT-PLAN.md) and
+[`tools/model-export`](../../tools/model-export/README.md). Python, PyTorch,
+Spandrel, ONNX export packages, and validation libraries can be removed from a
+production-only host after verified ONNX files have been produced.
+
+## 6. Post-install verification
+
+Confirm the framework, image runtime, driver, shared libraries, and installed
+package versions:
+
+```bash
+dotnet --info
+vips --version
+nvidia-smi
+
+ldconfig -p | grep -E \
+  'libcudart\.so\.12|libcudnn\.so\.9|libnvinfer\.so\.10|libnvonnxparser\.so\.10'
+
+dpkg-query -W \
+  'cuda-*12-9*' \
+  'cudnn9-cuda-12' \
+  'libnvinfer10' \
+  'libnvinfer-plugin10' \
+  'libnvonnxparsers10'
+```
+
+Then run the existing commands for each repository operation rather than
+copying variants from this package section:
+
+- local build and native-independent checks: `sh scripts/verify.sh`;
+- publish and service installation: [Publish and install](#publish-and-install);
+- sequential engine preparation: [Models and engines](#models-and-engines);
+- read-only provider/host preflight:
+  `sh scripts/engines/tensorrt-preflight.sh` with the documented environment;
+- real target-host GPU acceptance: [Verification and troubleshooting](#verification-and-troubleshooting).
+
+The preflight reports versions, provider/library loading, disk, RAM, VRAM, and
+cache writability. It does not install or modify packages.
 
 ## Models and engines
 
